@@ -6,44 +6,53 @@
 sudo su
 и необходимо выполнитьустановку всех необходимых пакетов:
 
-yum install -y redhat-lsb-core wget rpmdevtools rpm-build createrepo yum-utils openssl-devel zlib-devel pcre-devel gcc
+yum install -y redhat-lsb-core wget rpmdevtools rpm-build createrepo yum-utils gcc
 
 Скачиваем SPRM паакет NGINX для дальнейшей работы над ним
 
 wget https://nginx.org/packages/centos/7/SRPMS/nginx-1.18.0-1.el7.ngx.src.rpm
 
+Надо также скачать и разархивировать openssl
+
+wget https://www.openssl.org/source/latest.tar.gz
+
+tar -xvf latest.tar.gz
+
+Заранее поставим все зависимости чтобы в процессе сборки не было ошибок
+
+yum-builddep rpmbuild/SPECS/nginx.spec
+
+
 Воспользуемся rpm -i
 
 rpm -i nginx-1.18.0-1.el7.ngx.src.rpm
 
-Переходим в каталог /root/rpmbuild:
+Переходим в каталог rpmbuild:
 
 ls -nh
-total 8.0K
-drwxr-xr-x. 3 0 0 26 Aug 19 12:54 BUILD
-drwxr-xr-x. 2 0 0 6 Aug 19 13:19 BUILDROOT
-drwxr-xr-x. 3 0 0 20 Aug 19 13:19 RPMS
-drwxr-xr-x. 2 0 0 4.0K Aug 19 12:53 SOURCES
-drwxr-xr-x. 2 0 0 24 Aug 19 12:53 SPECS
-drwxr-xr-x. 2 0 0 6 Aug 19 12:54 SRPMS
+нас интересует вот этот путь 
 
-В папке SPECS лежит spec-файл, который описывает что и как собирать, внесем изменения в SPECS/nginx.spec ,добавив в секцию %build необходимый нам модуль OpenSSL:
+drwxr-xr-x. 2 0 0 24 Sep 16 19:33 SPECS
 
-%build ./configure %{BASE_CONFIGURE_ARGS}
---with-cc-opt="%{WITH_CC_OPT}"
---with-ld-opt="%{WITH_LD_OPT}"
---with-openssl=/root/rpmbuild/openssl-1.1.1f make %{?_smp_mflags} %{__mv} %{bdir}/objs/nginx
-%{bdir}/objs/nginx-debug ./configure %{BASE_CONFIGURE_ARGS}
+
+В папке SPECS лежит spec-файл, который описывает что и как собирать, нам нужно поправить SPECS/nginx.spec:
+
+|%build ./configure %{BASE_CONFIGURE_ARGS}
+|--with-cc-opt="%{WITH_CC_OPT}"
+|--with-ld-opt="%{WITH_LD_OPT}"
+|--with-openssl=/root/rpmbuild/openssl-1.1.1g make %{?_smp_mflags} %{__mv} %{bdir}/objs/nginx
+ %{bdir}/objs/nginx-debug ./configure %{BASE_CONFIGURE_ARGS}
 --with-cc-opt="%{WITH_CC_OPT}"
 --with-ld-opt="%{WITH_LD_OPT}" make %{?_smp_mflags}
 
-Установим зависимости - yum-builddep SPECS/nginx.spec, затем собираем - rpmbuild -bb SPECS/nginx.spec
+можем собирать пакет - rpmbuild -bb SPECS/nginx.spec
+
 Видим два собранных пакета:
 
 [root@otuslinux rpmbuild]# ls -l /root/rpmbuild/RPMS/x86_64/
 total 2524
--rw-r--r--. 1 root root 789552 Aug 19 13:19 nginx-1.18.0-1.el7.ngx.x86_64.rpm
--rw-r--r--. 1 root root 1792396 Aug 19 13:19 nginx-debuginfo-1.18.0-1.el7.ngx.x86_64.rpm
+-rw-r--r--. 1 root root 789552 Sep 16 19:50 nginx-1.18.0-1.el7.ngx.x86_64.rpm
+-rw-r--r--. 1 root root 1792396 Sep 16 19:50 nginx-debuginfo-1.18.0-1.el7.ngx.x86_64.rpm
 
 Устанавливаем rpm пакет
 
