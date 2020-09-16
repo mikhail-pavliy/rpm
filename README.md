@@ -7,7 +7,7 @@
 sudo su
 и необходимо выполнитьустановку всех необходимых пакетов:
 
-{ yum install -y redhat-lsb-core wget rpmdevtools rpm-build createrepo yum-utils gcc
+yum install -y redhat-lsb-core wget rpmdevtools rpm-build createrepo yum-utils gcc
 
 Скачиваем SPRM паакет NGINX для дальнейшей работы над ним
 
