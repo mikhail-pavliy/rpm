@@ -11,7 +11,7 @@ yum install -y redhat-lsb-core wget rpmdevtools rpm-build createrepo yum-utils g
 
 Скачиваем SPRM паакет NGINX для дальнейшей работы над ним
 
-$ wget https://nginx.org/packages/centos/7/SRPMS/nginx-1.18.0-1.el7.ngx.src.rpm
+" wget https://nginx.org/packages/centos/7/SRPMS/nginx-1.18.0-1.el7.ngx.src.rpm
 
 Надо также скачать и разархивировать openssl
 
